@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="HUFFZIP – An interactive Huffman Coding compression simulator. ADA Mini Project demonstrating the Greedy Algorithm for text file compression." />
+  <meta name="keywords" content="Huffman Coding, Greedy Algorithm, Data Compression, ADA, Binary Tree, File Compression" />
+  <meta name="author" content="HUFFZIP Lab" />
+
+  <title>HUFFZIP – Greedy Compression Lab</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════════════════════════ -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar-inner">
+
+      <!-- Logo -->
+      <div class="nav-logo" aria-label="HUFFZIP Logo">
+        <span class="logo-square" aria-hidden="true">H</span>
+      </div>
+
+      <!-- Center Brand -->
+      <div class="nav-brand">
+        <span class="nav-title">HUFFZIP</span>
+        <span class="nav-subtitle">Greedy Compression Lab</span>
+      </div>
+
+      <!-- Right Menu -->
+      <button class="nav-menu-btn" id="navMenuBtn" aria-label="Open menu" aria-expanded="false">
+        <span class="menu-bar"></span>
+        <span class="menu-bar"></span>
+        <span class="menu-bar"></span>
+      </button>
+    </div>
+
+    <!-- Dropdown Nav Menu -->
+    <div class="nav-dropdown" id="navDropdown" aria-hidden="true" role="menu">
+      <a href="#hero-section" role="menuitem">Home</a>
+      <a href="#text-section" role="menuitem">Text View</a>
+      <a href="#freq-section" role="menuitem">Frequency Table</a>
+      <a href="#tree-section" role="menuitem">Huffman Tree</a>
+      <a href="#output-section" role="menuitem">Encoded Output</a>
+      <a href="#algo-section" role="menuitem">Algorithm Info</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HERO SECTION
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="hero-section" id="hero-section" aria-labelledby="hero-title">
+    <div class="hero-card card card--yellow">
+
+      <div class="hero-badge" role="note">
+        <span>🎓 ADA Mini Project</span>
+        <span class="badge-dot" aria-hidden="true">•</span>
+        <span>Greedy Algorithm</span>
+      </div>
+
+      <h1 class="hero-title" id="hero-title">
+        FILE COMPRESSION<br/>SIMULATOR
+      </h1>
+      <p class="hero-subtitle">Powered by <strong>Huffman Coding</strong> — a classic greedy algorithm that assigns shorter binary codes to more frequent characters.</p>
+
+      <div class="hero-actions">
+
+        <!-- Hidden File Input -->
+        <input
+          type="file"
+          id="fileInput"
+          accept=".txt"
+          aria-label="Choose a .txt file to compress"
+          hidden
+        />
+
+        <button class="btn btn--black" id="uploadBtn" aria-controls="fileInput">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload TXT
+        </button>
+
+        <button class="btn btn--pink" id="compressBtn" disabled aria-disabled="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Compress File
+        </button>
+
+      </div>
+
+      <!-- File info strip -->
+      <div class="file-info-strip" id="fileInfoStrip" aria-live="polite" hidden>
+        <span class="file-icon" aria-hidden="true">📄</span>
+        <span class="file-name" id="fileName">No file selected</span>
+        <span class="file-size" id="fileSize"></span>
+      </div>
+
+    </div>
+
+    <!-- Floating decorative elements -->
+    <div class="hero-deco hero-deco--1" aria-hidden="true">01</div>
+    <div class="hero-deco hero-deco--2" aria-hidden="true">10</div>
+    <div class="hero-deco hero-deco--3" aria-hidden="true">110</div>
+    <div class="hero-deco hero-deco--4" aria-hidden="true">111</div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TEXT + STATS SECTION (Two Column)
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="two-col-section" id="text-section" aria-label="Original text and compression statistics" hidden>
+    <div class="container">
+      <div class="two-col-grid">
+
+        <!-- Left: Original Text -->
+        <div class="card card--cream" role="region" aria-labelledby="orig-text-label">
+          <div class="card-header">
+            <h2 class="card-title" id="orig-text-label">
+              <span class="card-title-icon" aria-hidden="true">📝</span>
+              Original Text
+            </h2>
+            <span class="badge badge--mint" id="charCountBadge" aria-label="Character count"></span>
+          </div>
+          <div class="text-display" id="originalTextDisplay" role="textbox" aria-multiline="true" aria-readonly="true" tabindex="0"></div>
+        </div>
+
+        <!-- Right: Compression Stats -->
+        <div class="card card--cream" role="region" aria-labelledby="stats-label">
+          <div class="card-header">
+            <h2 class="card-title" id="stats-label">
+              <span class="card-title-icon" aria-hidden="true">📊</span>
+              Compression Statistics
+            </h2>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card" id="stat-orig-bits">
+              <div class="stat-label">Original Size</div>
+              <div class="stat-value" id="origBitsVal">—</div>
+              <div class="stat-unit">bits</div>
+            </div>
+            <div class="stat-card stat-card--yellow" id="stat-comp-bits">
+              <div class="stat-label">Compressed Size</div>
+              <div class="stat-value" id="compBitsVal">—</div>
+              <div class="stat-unit">bits</div>
+            </div>
+            <div class="stat-card stat-card--pink" id="stat-saved">
+              <div class="stat-label">Space Saved</div>
+              <div class="stat-value" id="spaceSavedVal">—</div>
+              <div class="stat-unit">bits</div>
+            </div>
+            <div class="stat-card stat-card--mint" id="stat-ratio">
+              <div class="stat-label">Compression Ratio</div>
+              <div class="stat-value" id="compRatioVal">—</div>
+              <div class="stat-unit">: 1</div>
+            </div>
+          </div>
+
+          <!-- Visual compression bar -->
+          <div class="compression-bar-wrap" aria-hidden="true">
+            <div class="compression-bar-label">
+              <span>Original</span><span>Compressed</span>
+            </div>
+            <div class="compression-bar-track">
+              <div class="compression-bar-fill" id="compBar" style="width: 100%"></div>
+            </div>
+            <div class="compression-bar-pct" id="compBarPct"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       CHARACTER FREQUENCY TABLE
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="freq-section" id="freq-section" aria-labelledby="freq-title" hidden>
+    <div class="container">
+      <div class="card card--mint">
+
+        <div class="card-header">
+          <h2 class="card-title" id="freq-title">
+            <span class="card-title-icon" aria-hidden="true">🔢</span>
+            Character Frequency &amp; Huffman Codes
+          </h2>
+          <span class="badge badge--black" id="uniqueCharBadge" aria-label="Unique characters count"></span>
+        </div>
+
+        <div class="table-scroll-wrap" role="region" aria-label="Character frequency table" tabindex="0">
+          <table class="freq-table" id="freqTable" aria-describedby="freq-title">
+            <thead>
+              <tr>
+                <th scope="col">Character</th>
+                <th scope="col">Frequency</th>
+                <th scope="col">Huffman Code</th>
+                <th scope="col">Code Length</th>
+              </tr>
+            </thead>
+            <tbody id="freqTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HUFFMAN TREE VISUALIZATION
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="tree-section" id="tree-section" aria-labelledby="tree-title" hidden>
+    <div class="container">
+      <div class="card card--cream">
+
+        <div class="card-header">
+          <h2 class="card-title" id="tree-title">
+            <span class="card-title-icon" aria-hidden="true">🌳</span>
+            Huffman Tree Visualization
+          </h2>
+          <div class="tree-legend" role="list" aria-label="Tree node color legend">
+            <span class="legend-item" role="listitem">
+              <span class="legend-dot legend-dot--mint" aria-hidden="true"></span> Root
+            </span>
+            <span class="legend-item" role="listitem">
+              <span class="legend-dot legend-dot--pink" aria-hidden="true"></span> Internal
+            </span>
+            <span class="legend-item" role="listitem">
+              <span class="legend-dot legend-dot--yellow" aria-hidden="true"></span> Leaf
+            </span>
+          </div>
+        </div>
+
+        <div class="tree-controls">
+          <button class="btn btn--sm btn--black" id="zoomInBtn" aria-label="Zoom in tree">＋ Zoom In</button>
+          <button class="btn btn--sm btn--black" id="zoomOutBtn" aria-label="Zoom out tree">－ Zoom Out</button>
+          <button class="btn btn--sm btn--black" id="resetZoomBtn" aria-label="Reset tree zoom">↺ Reset</button>
+        </div>
+
+        <div class="tree-svg-wrap" id="treeSvgWrap" role="img" aria-label="Huffman coding tree diagram">
+          <!-- SVG rendered by JS -->
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       ENCODED OUTPUT SECTION
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="output-section" id="output-section" aria-labelledby="output-title" hidden>
+    <div class="container">
+      <div class="card card--yellow">
+
+        <div class="card-header">
+          <h2 class="card-title" id="output-title">
+            <span class="card-title-icon" aria-hidden="true">💾</span>
+            Encoded Binary Output
+          </h2>
+          <div class="output-actions">
+            <button class="btn btn--sm btn--black" id="copyOutputBtn" aria-label="Copy encoded output to clipboard">
+              📋 Copy
+            </button>
+            <button class="btn btn--sm btn--black" id="downloadBtn" aria-label="Download compressed .huff file">
+              ⬇ Download .HUFF
+            </button>
+          </div>
+        </div>
+
+        <textarea
+          class="encoded-output"
+          id="encodedOutput"
+          aria-label="Encoded binary string output"
+          readonly
+          spellcheck="false"
+          placeholder="Encoded binary output will appear here after compression..."
+        ></textarea>
+
+        <div class="output-meta" id="outputMeta" aria-live="polite"></div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       ALGORITHM INFO SECTION
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="algo-section" id="algo-section" aria-labelledby="algo-title">
+    <div class="container">
+
+      <div class="section-header">
+        <h2 class="section-title" id="algo-title">Algorithm Reference</h2>
+        <p class="section-subtitle">Everything you need to know about Huffman Coding</p>
+      </div>
+
+      <div class="algo-grid">
+
+        <!-- Info Cards -->
+        <div class="card card--cream algo-info-card">
+          <div class="algo-icon" aria-hidden="true">⚙️</div>
+          <div class="algo-label">Algorithm</div>
+          <div class="algo-value">Huffman Coding</div>
+        </div>
+
+        <div class="card card--yellow algo-info-card">
+          <div class="algo-icon" aria-hidden="true">🧠</div>
+          <div class="algo-label">Category</div>
+          <div class="algo-value">Greedy Algorithm</div>
+        </div>
+
+        <div class="card card--pink algo-info-card">
+          <div class="algo-icon" aria-hidden="true">⏱️</div>
+          <div class="algo-label">Time Complexity</div>
+          <div class="algo-value algo-value--mono">O(n log n)</div>
+        </div>
+
+        <div class="card card--mint algo-info-card">
+          <div class="algo-icon" aria-hidden="true">🗂️</div>
+          <div class="algo-label">Space Complexity</div>
+          <div class="algo-value algo-value--mono">O(n)</div>
+        </div>
+
+      </div>
+
+      <!-- Applications -->
+      <div class="card card--cream algo-apps-card">
+        <h3 class="card-title">
+          <span class="card-title-icon" aria-hidden="true">🚀</span>
+          Real-World Applications
+        </h3>
+        <div class="apps-grid" role="list">
+          <div class="app-chip" role="listitem">
+            <span class="app-chip-icon" aria-hidden="true">🗜️</span>
+            <span>ZIP Files</span>
+          </div>
+          <div class="app-chip" role="listitem">
+            <span class="app-chip-icon" aria-hidden="true">🖼️</span>
+            <span>PNG Images</span>
+          </div>
+          <div class="app-chip" role="listitem">
+            <span class="app-chip-icon" aria-hidden="true">📸</span>
+            <span>JPEG Compression</span>
+          </div>
+          <div class="app-chip" role="listitem">
+            <span class="app-chip-icon" aria-hidden="true">🎵</span>
+            <span>MP3 Audio</span>
+          </div>
+          <div class="app-chip" role="listitem">
+            <span class="app-chip-icon" aria-hidden="true">📡</span>
+            <span>Data Transmission</span>
+          </div>
+          <div class="app-chip" role="listitem">
+            <span class="app-chip-icon" aria-hidden="true">🌐</span>
+            <span>HTTP Compression</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="card card--mint algo-steps-card">
+        <h3 class="card-title">
+          <span class="card-title-icon" aria-hidden="true">🔍</span>
+          How Huffman Coding Works
+        </h3>
+        <ol class="algo-steps-list" aria-label="Huffman coding steps">
+          <li><strong>Count Frequencies</strong> — Scan the input text and count how many times each character appears.</li>
+          <li><strong>Build a Min-Heap</strong> — Insert all characters as leaf nodes, sorted by ascending frequency.</li>
+          <li><strong>Merge Nodes (Greedy Step)</strong> — Repeatedly extract the two minimum-frequency nodes and combine them into a new internal node whose frequency equals the sum.</li>
+          <li><strong>Repeat</strong> — Continue until only one node remains — the root of the Huffman Tree.</li>
+          <li><strong>Assign Codes</strong> — Traverse the tree: going left assigns <code>0</code>, going right assigns <code>1</code>. Leaf nodes receive their full binary code.</li>
+          <li><strong>Encode</strong> — Replace each character in the original text with its Huffman code to produce the compressed binary string.</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TOAST NOTIFICATION
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="toast" id="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════════════════════ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="logo-square logo-square--sm" aria-hidden="true">H</span>
+          <span class="footer-title">HUFFZIP</span>
+        </div>
+        <div class="footer-info">
+          <span>ADA Mini Project</span>
+          <span class="footer-dot" aria-hidden="true">•</span>
+          <span>Huffman Coding</span>
+          <span class="footer-dot" aria-hidden="true">•</span>
+          <span>Greedy Algorithm</span>
+        </div>
+        <div class="footer-note">Built with pure HTML, CSS &amp; JavaScript — no dependencies.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript Modules (order matters) -->
+  <script src="js/huffman.js"></script>
+  <script src="js/treeRenderer.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
