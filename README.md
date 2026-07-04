@@ -1,4 +1,4 @@
-# 🌊 HUFFZIP – Greedy Compression Lab
+# HUFFZIP – Greedy Compression Lab
 
 An **ADA (Analysis and Design of Algorithms) mini-project** that demonstrates **Huffman Coding** (Greedy Algorithm) for text file compression.  
 This is a **frontend-only web application** built with pure HTML, CSS, and Vanilla JavaScript — no frameworks, no external APIs, no backend. Everything runs offline in the browser.
